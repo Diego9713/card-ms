@@ -6,6 +6,6 @@ import org.springframework.stereotype.Repository;
 import reactor.core.publisher.Mono;
 
 @Repository
-public interface ICardRepository extends ReactiveMongoRepository<Card,String> {
-    Mono<Card> findByProductId(String productId);
+public interface ICardRepository extends ReactiveMongoRepository<Card, String> {
+  Mono<Card> findByProductId(String productId);
 }
