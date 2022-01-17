@@ -2,6 +2,7 @@ package bootcamp.com.cardms.expose;
 
 import bootcamp.com.cardms.business.ICardService;
 import bootcamp.com.cardms.model.CardDto;
+import io.github.resilience4j.circuitbreaker.annotation.CircuitBreaker;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.http.ResponseEntity;
@@ -95,11 +96,23 @@ public class CardController {
    * @param id -> is the identifier of the product account.
    * @return the card with change state.
    */
+
+  @CircuitBreaker(name = "productCB", fallbackMethod = "fallBackDeleteProduct")
   @DeleteMapping("/{id}")
   public Mono<ResponseEntity<CardDto>> removeCard(@PathVariable("id") String id) {
     return cardService.removeCard(id)
       .flatMap(p -> Mono.just(ResponseEntity.ok().body(p)))
       .switchIfEmpty(Mono.just(ResponseEntity.notFound().build()));
+  }
+
+  /**
+   * Method CircuitBreaker to removeCard.
+   *
+   * @param ex -> this is exception error.
+   * @return exception error.
+   */
+  public Mono<ResponseEntity<String>> fallBackDeleteProduct(@PathVariable("id") String id, RuntimeException ex) {
+    return Mono.just(ResponseEntity.ok().body("Search for the " + id + " in the service not available."));
   }
 }
 

@@ -128,4 +128,5 @@ public class CardService implements ICardService {
         .flatMap(isBool -> Boolean.TRUE.equals(isBool) ? Mono.just(new CardDto()) : Mono.empty()));
 
   }
+
 }
