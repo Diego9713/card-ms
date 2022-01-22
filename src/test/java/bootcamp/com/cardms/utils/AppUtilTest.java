@@ -1,7 +1,7 @@
 package bootcamp.com.cardms.utils;
 
 import bootcamp.com.cardms.model.Card;
-import bootcamp.com.cardms.model.CardDto;
+import bootcamp.com.cardms.model.dto.CardDto;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
