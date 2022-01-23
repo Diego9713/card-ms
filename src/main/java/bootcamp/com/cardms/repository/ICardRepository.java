@@ -8,4 +8,6 @@ import reactor.core.publisher.Mono;
 @Repository
 public interface ICardRepository extends ReactiveMongoRepository<Card, String> {
   Mono<Card> findByProductId(String productId);
+
+  Mono<Card> findByCardNumber(String cardNumber);
 }

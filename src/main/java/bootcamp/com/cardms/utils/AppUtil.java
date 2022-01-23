@@ -1,7 +1,7 @@
 package bootcamp.com.cardms.utils;
 
 import bootcamp.com.cardms.model.Card;
-import bootcamp.com.cardms.model.CardDto;
+import bootcamp.com.cardms.model.dto.CardDto;
 import org.springframework.beans.BeanUtils;
 
 public class AppUtil {

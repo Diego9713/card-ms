@@ -1,6 +1,8 @@
 package bootcamp.com.cardms.business.helper;
 
 import bootcamp.com.cardms.model.Card;
+import bootcamp.com.cardms.model.dto.CardAmountDto;
+import bootcamp.com.cardms.model.dto.ProductDto;
 import java.security.NoSuchAlgorithmException;
 import java.security.SecureRandom;
 import java.time.LocalDate;
@@ -11,6 +13,7 @@ import reactor.core.publisher.Mono;
 
 @Component
 public class CardHelper {
+
   private final Random random = SecureRandom.getInstanceStrong();
 
   public CardHelper() throws NoSuchAlgorithmException {
@@ -23,14 +26,16 @@ public class CardHelper {
    * @param card -> card object with entered data.
    * @return a card with complete data.
    */
-  public Mono<Card> setObjectCardBySave(Card card) {
+  public Mono<Card> setObjectCardBySave(Card card, ProductDto productDto) {
     Card objCard = new Card();
-    objCard.setCardType(card.getCardType().toUpperCase());
-    objCard.setProductId(card.getProductId());
-    objCard.setCardNumber(UUID.randomUUID().toString());
-    objCard.setCvv(generateCvv());
-    objCard.setMonth(LocalDate.now().getMonthValue());
-    objCard.setYear(LocalDate.now().plusYears(5).getYear());
+    if (productDto.getLevel() == 1) {
+      objCard.setCardType(card.getCardType().toUpperCase());
+      objCard.setProductId(card.getProductId());
+      objCard.setCardNumber(UUID.randomUUID().toString());
+      objCard.setCvv(generateCvv());
+      objCard.setMonth(LocalDate.now().getMonthValue());
+      objCard.setYear(LocalDate.now().plusYears(5).getYear());
+    }
     return Mono.just(objCard);
   }
 
@@ -52,6 +57,20 @@ public class CardHelper {
     objCard.setStatus(card.getStatus().toUpperCase());
     objCard.setId(findCard.getId());
     return Mono.just(objCard);
+  }
+
+  /**
+   * Method to generate report balance of product.
+   *
+   * @return report generate.
+   */
+  public Mono<CardAmountDto> generateReportsBalance(ProductDto productDto, Card card) {
+    CardAmountDto objCardAmountDto = new CardAmountDto();
+    objCardAmountDto.setCardNumber(card.getCardNumber());
+    objCardAmountDto.setCardType(card.getCardType());
+    objCardAmountDto.setAmount(productDto.getAmount());
+    objCardAmountDto.setStatus(card.getStatus());
+    return Mono.just(objCardAmountDto);
   }
 
   /**

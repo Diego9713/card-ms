@@ -1,6 +1,6 @@
 package bootcamp.com.cardms.business.helper;
 
-import bootcamp.com.cardms.model.ProductDto;
+import bootcamp.com.cardms.model.dto.ProductDto;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import org.springframework.web.reactive.function.client.WebClient;
@@ -10,6 +10,19 @@ import reactor.core.publisher.Mono;
 public class WebClientProductHelper {
   @Autowired
   private WebClient webClient;
+
+  /**
+   * Method to find product.
+   *
+   * @param id -> is the product identifier.
+   * @return a object product.
+   */
+  public Mono<ProductDto> findProduct(String id) {
+    return webClient.get()
+      .uri("/api/v1/products/" + id)
+      .retrieve()
+      .bodyToMono(ProductDto.class);
+  }
 
   /**
    * Method to change product status from card.
