@@ -4,7 +4,9 @@ import bootcamp.com.cardms.business.ICardService;
 import bootcamp.com.cardms.business.helper.CardHelper;
 import bootcamp.com.cardms.business.helper.WebClientProductHelper;
 import bootcamp.com.cardms.model.Card;
-import bootcamp.com.cardms.model.CardDto;
+import bootcamp.com.cardms.model.dto.CardAmountDto;
+import bootcamp.com.cardms.model.dto.CardDto;
+import bootcamp.com.cardms.model.dto.ProductDto;
 import bootcamp.com.cardms.repository.ICardRepository;
 import bootcamp.com.cardms.utils.AppUtil;
 import bootcamp.com.cardms.utils.ConstantsCardStatus;
@@ -53,6 +55,16 @@ public class CardService implements ICardService {
       .filter(cardDto -> cardDto.getStatus().equalsIgnoreCase(ConstantsCardStatus.ACTIVE.name()));
   }
 
+  @Override
+  @Transactional(readOnly = true)
+  public Mono<CardAmountDto> findBalanceCard(String cardNumber) {
+    log.info("find balance card >>>");
+    return cardRepository.findByCardNumber(cardNumber)
+      .filter(card -> !card.getCardNumber().isEmpty())
+      .flatMap(card -> webClientProductHelper.findProduct(card.getProductId())
+        .flatMap(productDto -> cardHelper.generateReportsBalance(productDto, card)));
+  }
+
   /**
    * Method of saving a card.
    *
@@ -64,11 +76,13 @@ public class CardService implements ICardService {
   public Mono<CardDto> createCard(CardDto card) {
     log.info("save card >>>");
     Card cardEntity = AppUtil.cardDtoToEntity(card);
+    Mono<ProductDto> findProduct = webClientProductHelper.findProduct(card.getProductId());
     return cardRepository.findByProductId(card.getProductId())
       .switchIfEmpty(Mono.just(new Card()))
       .filter(findCard -> findCard.getProductId() == null)
-      .flatMap(card1 -> cardHelper.setObjectCardBySave(cardEntity))
-      .flatMap(cardRepository::insert)
+      .flatMap(card1 -> findProduct.flatMap(productDto -> cardHelper.setObjectCardBySave(cardEntity, productDto)))
+      .filter(c -> c.getCardNumber() != null)
+      .flatMap(cardRepository::save)
       .map(AppUtil::entityToCardDto);
   }
 

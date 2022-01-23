@@ -1,7 +1,8 @@
 package bootcamp.com.cardms.expose;
 
 import bootcamp.com.cardms.business.ICardService;
-import bootcamp.com.cardms.model.CardDto;
+import bootcamp.com.cardms.model.dto.CardAmountDto;
+import bootcamp.com.cardms.model.dto.CardDto;
 import io.github.resilience4j.circuitbreaker.annotation.CircuitBreaker;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
@@ -43,6 +44,20 @@ public class CardController {
   @GetMapping("/{id}")
   public Mono<ResponseEntity<CardDto>> findOneCard(@PathVariable String id) {
     return cardService.findByIdCard(id)
+      .flatMap(p -> Mono.just(ResponseEntity.ok().body(p)))
+      .switchIfEmpty(Mono.just(ResponseEntity.badRequest().build()));
+
+  }
+
+  /**
+   * Method to Check main account balance.
+   *
+   * @param cardNumber -> is the card number of the card.
+   * @return a specific card.
+   */
+  @GetMapping("/balance/{cardNumber}")
+  public Mono<ResponseEntity<CardAmountDto>> findBalanceCard(@PathVariable("cardNumber") String cardNumber) {
+    return cardService.findBalanceCard(cardNumber)
       .flatMap(p -> Mono.just(ResponseEntity.ok().body(p)))
       .switchIfEmpty(Mono.just(ResponseEntity.badRequest().build()));
 
