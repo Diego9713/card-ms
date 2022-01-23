@@ -2,6 +2,7 @@ package bootcamp.com.cardms.expose;
 
 import bootcamp.com.cardms.business.impl.CardService;
 import bootcamp.com.cardms.model.Card;
+import bootcamp.com.cardms.model.dto.CardAmountDto;
 import bootcamp.com.cardms.model.dto.CardDto;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeAll;
@@ -31,6 +32,7 @@ class CardControllerTest {
 
   private static final Card card = new Card();
   private static final CardDto cardDto = new CardDto();
+  private static final CardAmountDto cardAmountDto = new CardAmountDto();
   private static final String id = "61dcaf570feb3d339e4c04b0";
   private static final String productId = "61db64d731dec743727907f3";
   private static final String cardNumber = "28101231-0512-4eb4-951f-3a7e3a49811f";
@@ -51,6 +53,7 @@ class CardControllerTest {
     card.setYear(year);
     card.setStatus(status);
     BeanUtils.copyProperties(card, cardDto);
+    BeanUtils.copyProperties(card, cardAmountDto);
   }
 
   @Test
@@ -58,7 +61,8 @@ class CardControllerTest {
   void findAllCard() {
     when(cardService.findAllCard()).thenReturn(Flux.just(cardDto));
 
-    WebTestClient.ResponseSpec responseSpec = webTestClient.get().uri("/api/v1/cards")
+    WebTestClient.ResponseSpec responseSpec = webTestClient.get()
+      .uri("/api/v1/cards")
       .accept(MediaType.APPLICATION_JSON)
       .exchange();
 
@@ -71,12 +75,31 @@ class CardControllerTest {
   void findOneCard() {
     when(cardService.findByIdCard(id)).thenReturn(Mono.just(cardDto));
 
-    WebTestClient.ResponseSpec responseSpec = webTestClient.get().uri("/api/v1/cards/" + id)
+    WebTestClient.ResponseSpec responseSpec = webTestClient.get()
+      .uri("/api/v1/cards/" + id)
       .accept(MediaType.APPLICATION_JSON)
       .exchange();
 
     responseSpec.expectStatus().isOk()
       .expectHeader().contentType(MediaType.APPLICATION_JSON);
+    responseSpec.expectBody()
+      .jsonPath("$.id").isEqualTo(cardDto.getId());
+  }
+
+  @Test
+  @DisplayName("GET -> /api/v1/cards/balance/{cardNumber}")
+  void findBalanceCard() {
+    when(cardService.findBalanceCard(cardNumber)).thenReturn(Mono.just(cardAmountDto));
+
+    WebTestClient.ResponseSpec responseSpec = webTestClient.get()
+      .uri("/api/v1/cards/balance/" + cardNumber)
+      .accept(MediaType.APPLICATION_JSON)
+      .exchange();
+
+    responseSpec.expectStatus().isOk()
+      .expectHeader().contentType(MediaType.APPLICATION_JSON);
+    responseSpec.expectBody()
+      .jsonPath("$.cardNumber").isEqualTo(cardAmountDto.getCardNumber());
   }
 
   @Test
@@ -98,7 +121,8 @@ class CardControllerTest {
   void removeCardByProduct() {
     when(cardService.removeCardByProductId(productId)).thenReturn(Mono.just(cardDto));
 
-    WebTestClient.ResponseSpec responseSpec = webTestClient.delete().uri("/api/v1/cards/product/" + productId)
+    WebTestClient.ResponseSpec responseSpec = webTestClient.delete()
+      .uri("/api/v1/cards/product/" + productId)
       .accept(MediaType.APPLICATION_JSON)
       .exchange();
 
@@ -113,7 +137,8 @@ class CardControllerTest {
   void removeCard() {
     when(cardService.removeCard(id)).thenReturn(Mono.just(cardDto));
 
-    WebTestClient.ResponseSpec responseSpec = webTestClient.delete().uri("/api/v1/cards/" + id)
+    WebTestClient.ResponseSpec responseSpec = webTestClient.delete()
+      .uri("/api/v1/cards/" + id)
       .accept(MediaType.APPLICATION_JSON)
       .exchange();
 
@@ -123,4 +148,8 @@ class CardControllerTest {
       .jsonPath("$.id").isEqualTo(cardDto.getId());
   }
 
+  @Test
+  void fallBackDeleteProduct() {
+    Assertions.assertNotNull(cardController.fallBackDeleteProduct(id, new RuntimeException("")));
+  }
 }

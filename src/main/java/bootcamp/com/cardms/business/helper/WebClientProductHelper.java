@@ -32,9 +32,9 @@ public class WebClientProductHelper {
    */
   public Mono<Boolean> deleteProduct(String id) {
     Mono<ProductDto> productDtoMono = webClient.delete()
-      .uri("/api/v1/products/" + id)
-      .retrieve()
-      .bodyToMono(ProductDto.class);
+        .uri("/api/v1/products/" + id)
+        .retrieve()
+        .bodyToMono(ProductDto.class);
     return productDtoMono.flatMap(cardDto -> cardDto.getId() != null ? Mono.just(true) : Mono.just(false));
 
   }

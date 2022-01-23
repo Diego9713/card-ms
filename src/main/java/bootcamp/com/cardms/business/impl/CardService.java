@@ -62,7 +62,7 @@ public class CardService implements ICardService {
     return cardRepository.findByCardNumber(cardNumber)
       .filter(card -> !card.getCardNumber().isEmpty())
       .flatMap(card -> webClientProductHelper.findProduct(card.getProductId())
-        .flatMap(productDto -> cardHelper.generateReportsBalance(productDto,card)));
+        .flatMap(productDto -> cardHelper.generateReportsBalance(productDto, card)));
   }
 
   /**
@@ -80,8 +80,8 @@ public class CardService implements ICardService {
     return cardRepository.findByProductId(card.getProductId())
       .switchIfEmpty(Mono.just(new Card()))
       .filter(findCard -> findCard.getProductId() == null)
-      .flatMap(card1 -> findProduct.flatMap(productDto -> cardHelper.setObjectCardBySave(cardEntity,productDto)))
-      .filter( c -> c.getCardNumber() != null)
+      .flatMap(card1 -> findProduct.flatMap(productDto -> cardHelper.setObjectCardBySave(cardEntity, productDto)))
+      .filter(c -> c.getCardNumber() != null)
       .flatMap(cardRepository::save)
       .map(AppUtil::entityToCardDto);
   }
